@@ -1,0 +1,1 @@
+global using CUGOJ.Backend.Share.Common.Models;

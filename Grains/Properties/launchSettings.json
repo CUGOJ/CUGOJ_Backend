@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Grains": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -2,6 +2,7 @@
   "profiles": {
     "Silo": {
       "commandName": "Project",
+      "commandLineArgs": "-db server=1.15.93.80,1433;uid=sa;pwd=Long8898321Zx.; -e dev -debug",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

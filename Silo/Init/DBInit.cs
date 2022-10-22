@@ -1,4 +1,5 @@
 using CUGOJ.Backend.Base.DAO.Context;
+
 namespace CUGOJ.Backend.Silo.Init;
 public static class DBInit
 {

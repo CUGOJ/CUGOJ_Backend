@@ -1,28 +1,26 @@
+using CUGOJ.Backend.Silo.Init;
+using CUGOJ.Backend.Tools.Params;
 using Orleans.Configuration;
 using Orleans.Hosting;
 try
 {
-    CUGOJ.Backend.Tools.Properties.Properties.LoadProperties(args);
+    Config.LoadProperties(args);
 
-    CUGOJ.Backend.Silo.Init.Init.InitSilo();
+    Init.InitSilo();
 
     var silo = new HostBuilder().UseOrleans(builder =>
     {
         builder.Configure<ClusterOptions>(options =>
         {
-            options.ClusterId = Properties.Env;
+            options.ClusterId = Config.Env;
             options.ServiceId = "CUGOJ";
         })
         .UseAdoNetClustering(options =>
         {
-            options.ConnectionString = Properties.OrleansDBConnectionString;
+            options.ConnectionString = Config.OrleansDBConnectionString;
             options.Invariant = "System.Data.SqlClient";
         })
-        .ConfigureEndpoints(siloPort: Properties.SiloPort, gatewayPort: Properties.GatewayPort)
-        .ConfigureServices(services =>
-        {
-            services.AddSingleton<>();
-        });
+        .ConfigureEndpoints(siloPort: Config.SiloPort, gatewayPort: Config.GatewayPort);
         // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CUGOJ.Backend.Grains.UserGrain).Assembly).WithReferences())
     }).Build();
     await silo.StartAsync();

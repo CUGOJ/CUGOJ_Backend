@@ -24,6 +24,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>976d3ceb-5ab3-4721-867c-0610e3829be7</UserSecretsId>
+    <RootNamespace>CUGOJ.Backend.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
 </Project>

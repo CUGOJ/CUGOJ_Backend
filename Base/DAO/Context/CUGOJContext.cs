@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using CUGOJ.Backend.Share.Common.Models;
 
 namespace CUGOJ.Backend.Base.DAO.Context
 {

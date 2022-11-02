@@ -1,4 +1,4 @@
-﻿using CUGOJ.Backend.Tools.Params;
+﻿using CUGOJ.Backend.Tools;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;

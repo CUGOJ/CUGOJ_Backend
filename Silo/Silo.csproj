@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Grains\Grains.csproj" />
     <ProjectReference Include="..\Base\Base.csproj" />
+    <ProjectReference Include="..\Tools\Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

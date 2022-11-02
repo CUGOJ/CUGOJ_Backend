@@ -1,5 +1,5 @@
 using CUGOJ.Backend.Silo.Init;
-using CUGOJ.Backend.Tools.Params;
+using CUGOJ.Backend.Tools;
 using Orleans.Configuration;
 using Orleans.Hosting;
 try
@@ -8,7 +8,8 @@ try
 
     Init.InitSilo();
 
-    var silo = new HostBuilder().UseOrleans(builder =>
+    var siloBuilder = new HostBuilder()
+        .UseOrleans(builder =>
     {
         builder.Configure<ClusterOptions>(options =>
         {
@@ -22,7 +23,17 @@ try
         })
         .ConfigureEndpoints(siloPort: Config.SiloPort, gatewayPort: Config.GatewayPort);
         // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CUGOJ.Backend.Grains.UserGrain).Assembly).WithReferences())
-    }).Build();
+    });
+    siloBuilder.ConfigureServices(
+        service =>
+        {
+            ServiceInit.InitService(service);
+        });
+
+
+    var silo = siloBuilder.Build();
+    ServiceInit.LoadSingletonService(silo.Services);
+
     await silo.StartAsync();
     var builder = WebApplication.CreateBuilder(args);
     var app = builder.Build();

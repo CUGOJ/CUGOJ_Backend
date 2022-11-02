@@ -12,6 +12,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="Microsoft.Orleans.Core" Version="3.6.5" />
+    <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="3.6.5" />
+    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="3.6.5" />
+    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.6.5" />
+    <PackageReference Include="Microsoft.Orleans.Runtime.Abstractions" Version="3.6.5" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.8" />
     <PackageReference Include="coverlet.collector" Version="3.1.2" />
@@ -23,7 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Base\Base.csproj" />
+    <ProjectReference Include="..\Grains\Grains.csproj" />
+    <ProjectReference Include="..\Share\Share.csproj" />
+    <ProjectReference Include="..\Silo\Silo.csproj" />
     <ProjectReference Include="..\Tools\Tools.csproj" />
+    <ProjectReference Include="..\Update\Update.csproj" />
   </ItemGroup>
 
 </Project>

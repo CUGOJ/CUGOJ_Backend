@@ -1,4 +1,4 @@
-﻿using CUGOJ.Backend.Tools.Params;
+﻿using CUGOJ.Backend.Tools;
 using Microsoft.Extensions.Logging;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
@@ -58,14 +58,15 @@ namespace CUGOJ.Backend.Tools.Log
         private readonly Serilog.ILogger? _serilogger;
         public Logger()
         {
-            if (string.IsNullOrEmpty(Config.LogAddress))
+            if (!string.IsNullOrEmpty(Config.LogAddress))
             {
                 var config = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .Enrich.FromLogContext()
                 .WriteTo.LokiHttp(new NoAuthCredentials(Config.LogAddress),new LogLabelProvider());
-                if (Config.Debug)
-                    config.WriteTo.Console();
+#if DEBUG
+                config.WriteTo.Console();
+#endif
                 _serilogger = config.CreateLogger();
             }
             else
@@ -73,9 +74,10 @@ namespace CUGOJ.Backend.Tools.Log
                 var config = new LoggerConfiguration()
               .MinimumLevel.Debug()
               .Enrich.FromLogContext()
-              .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day);   
-                if (Config.Debug)
-                    config.WriteTo.Console();
+              .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day);
+#if DEBUG
+                config.WriteTo.Console();
+#endif
                 _serilogger = config.CreateLogger();
             }
         }

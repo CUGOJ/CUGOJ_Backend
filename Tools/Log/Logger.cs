@@ -20,26 +20,6 @@ namespace CUGOJ.Backend.Tools.Log
 {
     public class Logger : Microsoft.Extensions.Logging.ILogger
     {
-        [PSerializable]
-        [AttributeUsage(AttributeTargets.Method)]
-        public class TagInsertAttribute: OnMethodBoundaryAspect
-        {
-            List<IDisposable> tags = new List<IDisposable>();
-            public override void OnEntry(MethodExecutionArgs args)
-            {
-                tags.Add(LogContext.PushProperty("Method", args.Arguments[2]));
-                tags.Add(LogContext.PushProperty("FilePos", string.Format("{0}:{1}", args.Arguments[3], args.Arguments[4])));
-                if (Activity.Current!=null)
-                    tags.Add(LogContext.PushProperty("TraceID", Activity.Current.TraceId));
-            }
-            public override void OnExit(MethodExecutionArgs args)
-            {
-                foreach (var tag in tags)
-                {
-                    tag.Dispose();
-                }
-            }
-        }
 
         public class LogLabelProvider : ILogLabelProvider
         {
@@ -82,35 +62,40 @@ namespace CUGOJ.Backend.Tools.Log
             }
         }
 
-        [TagInsert]
-        public void Info (string template, object?[]? objects=null,
-            [CallerMemberName]string method = "",
-            [CallerFilePath]string sourceFilePath="",
-            [CallerLineNumber]int sourceLineNumber = 0 )
-        {
-            _serilogger?.Information(template, objects);
-        }
-
-        [TagInsert]
-        public void Warn(string template, object?[]? objects = null,
-            [CallerMemberName] string memberName = "",
+        public void Info(string message,
+            [CallerMemberName] string method = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            _serilogger?.Warning(template, objects);
+            using var methodTag = LogContext.PushProperty("Method", method);
+            using var filePos = LogContext.PushProperty("FilePos", $"{sourceFilePath}:{sourceLineNumber}");
+            using var traceID = LogContext.PushProperty("TraceID", Activity.Current?.TraceId);
+            _serilogger?.Information(message);
         }
 
-        [TagInsert]
-        public void Error(string template, object?[]? objects = null,
-            [CallerMemberName] string memberName = "",
+        public void Warn(string message,
+            [CallerMemberName] string method = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            _serilogger?.Error(template, objects);
+            using var methodTag = LogContext.PushProperty("Method", method);
+            using var filePos = LogContext.PushProperty("FilePos", $"{sourceFilePath}:{sourceLineNumber}");
+            using var traceID = LogContext.PushProperty("TraceID", Activity.Current?.TraceId);
+            _serilogger?.Warning(message);
         }
 
-        [TagInsert]
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Error(string message,
+            [CallerMemberName] string method = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            using var methodTag = LogContext.PushProperty("Method", method);
+            using var filePos = LogContext.PushProperty("FilePos", $"{sourceFilePath}:{sourceLineNumber}");
+            using var traceID = LogContext.PushProperty("TraceID", Activity.Current?.TraceId);
+            _serilogger?.Error(message);
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (_serilogger == null) return;
             switch (logLevel)

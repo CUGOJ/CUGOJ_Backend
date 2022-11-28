@@ -1,3 +1,6 @@
+using CUGOJ.Backend.Tools.Common;
+using System.Reflection;
+
 namespace CUGOJ.Backend.Tools;
 public static class ParamParser
 {
@@ -25,6 +28,8 @@ public static class ParamParser
         {"admin","admin" },
         {"nossl","-nossl" }
     };
+
+  
 
     public static Dictionary<string, string> ParseArgs(string[] args,bool AllowReplicate = false)
     {
@@ -76,4 +81,5 @@ public static class ParamParser
         }
         return res;
     }
+
 }

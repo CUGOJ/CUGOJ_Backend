@@ -22,6 +22,63 @@ namespace Base.UpdateSqlSnapshot.Migrations.v1initial
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("CUGOJ.Backend.Share.Common.Models.Authorize", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasComment("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<long>("Action")
+                        .HasColumnType("bigint")
+                        .HasColumnName("action")
+                        .HasComment("授权的权限集合,按位表示");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("create_time")
+                        .HasComment("创建时间");
+
+                    b.Property<long>("GranteeId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("grantee_id")
+                        .HasComment("被授权对象Id");
+
+                    b.Property<int>("GranteeType")
+                        .HasColumnType("int")
+                        .HasColumnName("grantee_type")
+                        .HasComment("被授权对象种类");
+
+                    b.Property<long>("ResourceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_id")
+                        .HasComment("资源Id");
+
+                    b.Property<int>("ResourceType")
+                        .HasColumnType("int")
+                        .HasColumnName("resource_type")
+                        .HasComment("资源类型");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int")
+                        .HasColumnName("role")
+                        .HasComment("被授权对象的");
+
+                    b.Property<DateTime>("UpdateTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("update_time")
+                        .HasComment("最后更新时间");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GranteeId", "ResourceId");
+
+                    b.ToTable("authorize");
+                });
+
             modelBuilder.Entity("CUGOJ.Backend.Share.Common.Models.ContestBase", b =>
                 {
                     b.Property<long>("Id")
@@ -257,6 +314,11 @@ namespace Base.UpdateSqlSnapshot.Migrations.v1initial
                         .HasColumnName("name")
                         .HasComment("组织名");
 
+                    b.Property<int>("OrganizationType")
+                        .HasColumnType("int")
+                        .HasColumnName("organization_type")
+                        .HasComment("组织类型");
+
                     b.Property<long>("Owner")
                         .HasColumnType("bigint")
                         .HasColumnName("owner")
@@ -266,6 +328,16 @@ namespace Base.UpdateSqlSnapshot.Migrations.v1initial
                         .HasColumnType("bigint")
                         .HasColumnName("parent_id")
                         .HasComment("父组织");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int")
+                        .HasColumnName("role")
+                        .HasComment("父组织中的身份");
+
+                    b.Property<string>("Signature")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("signature")
+                        .HasComment("个性签名");
 
                     b.Property<int>("Status")
                         .HasColumnType("int")
@@ -1188,6 +1260,50 @@ namespace Base.UpdateSqlSnapshot.Migrations.v1initial
                     b.HasIndex(new[] { "UserId", "Time" }, "idx_user_time");
 
                     b.ToTable("user_login", (string)null);
+                });
+
+            modelBuilder.Entity("CUGOJ.Backend.Share.Common.Models.UserOrganizationLink", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasComment("主键");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("create_time")
+                        .HasComment("创建时间");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("organization_id")
+                        .HasComment("组织Id");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int")
+                        .HasColumnName("role")
+                        .HasComment("用户在组织内的角色");
+
+                    b.Property<DateTime>("UpdateTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("update_time")
+                        .HasComment("最后更新时间");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id")
+                        .HasComment("用户Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("OrganizationId", "Role");
+
+                    b.ToTable("user_organization_link");
                 });
 #pragma warning restore 612, 618
         }

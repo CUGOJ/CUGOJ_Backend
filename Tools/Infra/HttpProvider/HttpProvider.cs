@@ -14,8 +14,8 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
     // Singleton Service
     public class HttpProvider : IHttpProvider
     {
-        private readonly Logger _logger;
-        public HttpProvider(Logger logger)
+        private readonly Logger? _logger;
+        public HttpProvider(Logger? logger=null)
         {
             _logger = logger;
             if(Config.AllowUnsafeSSL)
@@ -46,7 +46,7 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
             {
 #if DEBUG
                 var parsedUri = ParseGetUrl(baseUrl, param);
-                _logger.Info("HttpProvider.Get: {uri}", new object[] { parsedUri });
+                _logger?.Info($"HttpProvider.Get: {parsedUri}");
                 var uri = new Uri(parsedUri);
                 DateTime startTime = DateTime.Now;
 #else
@@ -81,14 +81,14 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
                     result.Message = await response.Content.ReadAsStringAsync();
                 }
 #if DEBUG
-                _logger.Info("HttpProvider.Get: {uri} 用时: {time}ms", new object[] { uri, (DateTime.Now - startTime).TotalMilliseconds });
-                _logger.Info("HttpProvider.Get: resp = {resp}", new object[] { System.Text.Json.JsonSerializer.Serialize(result) });
+                _logger?.Info($"HttpProvider.Get: {uri} 用时: {(DateTime.Now - startTime).TotalMilliseconds}ms");
+                _logger?.Info($"HttpProvider.Get: resp = {System.Text.Json.JsonSerializer.Serialize(result)}");
 #endif
                 return result;
             }
             catch(Exception e)
             {
-                _logger.Error($"Get请求发生Exception,message = {e.Message};stack = {e.StackTrace}");
+                _logger?.Error($"Get请求发生Exception,message = {e.Message};stack = {e.StackTrace}");
                 return new HttpResult<T>
                 {
                     Code = System.Net.HttpStatusCode.BadRequest,
@@ -111,7 +111,7 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
         {
             var uri = new Uri(ParsePostUrl(baseUrl, param));
 #if DEBUG
-            _logger.Log(LogLevel.Information, "HttpProvider.Post: {uri}", uri.ToString());
+            _logger?.Log(LogLevel.Information, "HttpProvider.Post: {uri}", uri.ToString());
             DateTime startTime = DateTime.Now;
 
 #endif
@@ -128,7 +128,7 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
                 request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(param), Encoding.UTF8, "application/json");
             }
 #if DEBUG
-            _logger.Info("HttpProvider.Post: Content = {content}", new object?[] { request.Content });
+            _logger?.Info($"HttpProvider.Post: Content = {request.Content}");
 #endif
             var response = await client.SendAsync(request);
             var result = new HttpResult<T>();
@@ -151,8 +151,8 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
                 result.Message = await response.Content.ReadAsStringAsync();
             }
 #if DEBUG
-            _logger.Info("HttpProvider.Post: {uri} 用时: {time}ms", new object[] { uri, (DateTime.Now - startTime).TotalMilliseconds });
-            _logger.Info("HttpProvider.Post: resp = {resp}", new object[] { System.Text.Json.JsonSerializer.Serialize(result) });
+            _logger?.Info($"HttpProvider.Post: {uri} 用时: {(DateTime.Now - startTime).TotalMilliseconds}ms");
+            _logger?.Info($"HttpProvider.Post: resp = {System.Text.Json.JsonSerializer.Serialize(result)}");
 #endif
             return result;
         }
@@ -161,13 +161,13 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
         {
             var uri = new Uri(baseUrl);
 #if DEBUG
-            _logger.Log(LogLevel.Information, "HttpProvider.Post: {uri}", uri.ToString());
+            _logger?.Log(LogLevel.Information, "HttpProvider.Post: {uri}", uri.ToString());
             DateTime startTime = DateTime.Now;
 #endif
             var request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Content = new StringContent($"\"{content}\"", Encoding.UTF8, "application/json");
 #if DEBUG
-            _logger.Info("HttpProvider.Post: Content = {content}", new object?[] { request.Content });
+            _logger?.Info($"HttpProvider.Post: Content = {request.Content}");
 #endif
             var response = await client.SendAsync(request);
             var result = new HttpResult<T>();
@@ -190,8 +190,8 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
                 result.Message = await response.Content.ReadAsStringAsync();
             }
 #if DEBUG
-            _logger.Info("HttpProvider.Post: {uri} 用时: {time}ms", new object[] { uri, (DateTime.Now - startTime).TotalMilliseconds });
-            _logger.Info("HttpProvider.Post: resp = {resp}", new object[] { System.Text.Json.JsonSerializer.Serialize(result) });
+            _logger?.Info($"HttpProvider.Post: {uri} 用时: {(DateTime.Now - startTime).TotalMilliseconds}ms");
+            _logger?.Info($"HttpProvider.Post: resp = {System.Text.Json.JsonSerializer.Serialize(result)}");
 #endif
             return result;
         }

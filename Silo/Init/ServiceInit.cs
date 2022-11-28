@@ -19,7 +19,7 @@ namespace CUGOJ.Backend.Silo.Init
         {
             var configProvider = serviceProvider.GetRequiredService<IConfigProvider>();
 
-            RemoteConfigAttribute.SetConfigProvider(configProvider);
+            ConfigItemAttribute.ConfigProvider = configProvider;
         }
     }
 }

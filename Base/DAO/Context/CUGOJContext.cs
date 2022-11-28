@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using CUGOJ.Backend.Share.Common.Models;
+using CUGOJ.Backend.Share.DAO;
 
 namespace CUGOJ.Backend.Base.DAO.Context
 {
-    public partial class CUGOJContext : DbContext
+    public partial class CUGOJContext : DbContext, ICUGOJContext
     {
         public CUGOJContext()
         {
@@ -33,13 +34,12 @@ namespace CUGOJ.Backend.Base.DAO.Context
         public virtual DbSet<TeamUser> TeamUsers { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserLogin> UserLogins { get; set; } = null!;
+        public virtual DbSet<UserOrganizationLink> UserOrganizationLinks { get; set; } = null!;
+        public virtual DbSet<Authorize> Authorizes { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(Config.StoreDBConnectionString);
-            }
+            optionsBuilder.UseSqlServer(Config.StoreDBConnectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

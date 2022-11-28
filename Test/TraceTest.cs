@@ -35,7 +35,7 @@ namespace CUGOJ.Backend.Test
         
         public void TraceContainerTest()
         {
-            Config.LoadProperties(new string[] { "-debug" });
+            Config.InitConfig(new string[] { "-debug" });
             var container = new TestContainer();
             container.Func1();
         }

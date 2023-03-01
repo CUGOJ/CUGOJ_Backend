@@ -1,4 +1,4 @@
-﻿namespace CUGOJ.Backend.Grains;
+﻿namespace CUGOJ.Grains;
 public class Class1
 {
 

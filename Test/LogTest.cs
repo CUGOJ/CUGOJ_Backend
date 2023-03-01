@@ -1,4 +1,4 @@
-﻿using CUGOJ.Backend.Tools.Log;
+﻿using CUGOJ.Tools.Log;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Test
+namespace CUGOJ.Test
 {
     [TestClass]
     public class LogTest
@@ -15,7 +15,7 @@ namespace CUGOJ.Backend.Test
         public void TestLog()
         {
             ILogger logger = new Logger();
-            
+
         }
     }
 }

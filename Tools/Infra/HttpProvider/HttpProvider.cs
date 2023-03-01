@@ -1,24 +1,23 @@
-﻿using CUGOJ.Backend.Share.Infra;
-using CUGOJ.Backend.Tools.Log;
-using CUGOJ.Backend.Tools;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using CUGOJ.Share.Infra;
+using CUGOJ.Tools.Log;
 
-namespace CUGOJ.Backend.Tools.Infra.HttpProvider
+namespace CUGOJ.Tools.Infra.HttpProvider
 {
     // Singleton Service
     public class HttpProvider : IHttpProvider
     {
         private readonly Logger? _logger;
-        public HttpProvider(Logger? logger=null)
+        public HttpProvider(Logger? logger = null)
         {
             _logger = logger;
-            if(Config.AllowUnsafeSSL)
+            if (Config.AllowUnsafeSSL)
             {
                 var handler = new HttpClientHandler();
                 handler.ServerCertificateCustomValidationCallback = delegate { return true; };
@@ -86,7 +85,7 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
 #endif
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _logger?.Error($"Get请求发生Exception,message = {e.Message};stack = {e.StackTrace}");
                 return new HttpResult<T>
@@ -237,9 +236,9 @@ namespace CUGOJ.Backend.Tools.Infra.HttpProvider
             return url;
         }
 
-        private static T ParseBaseType<T> (string src)
+        private static T ParseBaseType<T>(string src)
         {
-           return (T)Convert.ChangeType(src, typeof(T)) ;
+            return (T)Convert.ChangeType(src, typeof(T));
         }
     }
 }

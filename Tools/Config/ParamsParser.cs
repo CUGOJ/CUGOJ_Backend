@@ -1,7 +1,7 @@
-using CUGOJ.Backend.Tools.Common;
+using CUGOJ.Tools.Common;
 using System.Reflection;
 
-namespace CUGOJ.Backend.Tools;
+namespace CUGOJ.Tools;
 public static class ParamParser
 {
     private static Dictionary<string, string> argKeys = new Dictionary<string, string>()
@@ -29,9 +29,9 @@ public static class ParamParser
         {"nossl","-nossl" }
     };
 
-  
 
-    public static Dictionary<string, string> ParseArgs(string[] args,bool AllowReplicate = false)
+
+    public static Dictionary<string, string> ParseArgs(string[] args, bool AllowReplicate = false)
     {
         Dictionary<string, string> res = new();
         string? key = null;
@@ -56,7 +56,7 @@ public static class ParamParser
                     if (key.StartsWith('-'))
                     {
                         key = key.Substring(1);
-                        if (!AllowReplicate && res.ContainsKey(key)) 
+                        if (!AllowReplicate && res.ContainsKey(key))
                         {
                             throw new Exception("重复设置参数" + key);
                         }

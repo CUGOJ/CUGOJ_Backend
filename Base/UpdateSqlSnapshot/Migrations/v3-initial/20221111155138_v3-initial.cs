@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace CUGOJ.Backend.Base.UpdateSqlSnapshot.Migrations.v3initial
+namespace CUGOJ.Base.UpdateSqlSnapshot.Migrations.v3initial
 {
     public partial class v3initial : Migration
     {

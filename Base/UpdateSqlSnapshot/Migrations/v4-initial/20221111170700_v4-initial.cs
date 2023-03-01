@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace CUGOJ.Backend.Base.UpdateSqlSnapshot.Migrations.v4initial
+namespace CUGOJ.Base.UpdateSqlSnapshot.Migrations.v4initial
 {
     public partial class v4initial : Migration
     {

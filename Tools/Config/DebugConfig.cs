@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Tools
+namespace CUGOJ.Tools
 {
     public static partial class Config
     {

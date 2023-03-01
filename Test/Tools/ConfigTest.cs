@@ -1,4 +1,5 @@
-﻿using CUGOJ.Backend.Tools;
+﻿using CUGOJ.Test;
+using CUGOJ.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Test.Tools
+namespace CUGOJ.Test.Tools
 {
     [TestClass]
     public class ConfigTest
@@ -25,9 +26,9 @@ namespace CUGOJ.Backend.Test.Tools
             PropertyInfo p1 = t1.GetProperty("Debug")!;
             PropertyInfo p2 = t2.GetProperty("Debug")!;
             PropertyInfo p3 = t1.GetProperty("Env")!;
-            var a1 = ConfigItemAttribute.GetCustomAttributes(p1);
-            var a2 = ConfigItemAttribute.GetCustomAttributes(p2);
-            var a3 = ConfigItemAttribute.GetCustomAttributes(p3);
+            var a1 = Attribute.GetCustomAttributes(p1);
+            var a2 = Attribute.GetCustomAttributes(p2);
+            var a3 = Attribute.GetCustomAttributes(p3);
             if (a1[0] == a2[0])
             {
                 Console.WriteLine("Yes");

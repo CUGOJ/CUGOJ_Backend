@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Share.Infra
+namespace CUGOJ.Share.Infra
 {
     public interface IConfigProvider
     {

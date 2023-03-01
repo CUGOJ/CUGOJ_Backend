@@ -1,5 +1,5 @@
-﻿using CUGOJ.Backend.Share.Infra;
-using CUGOJ.Backend.Tools.Common;
+﻿using CUGOJ.Tools.Common;
+using CUGOJ.Share.Infra;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PostSharp.Aspects;
 using PostSharp.Aspects.Configuration;
@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Tools
+namespace CUGOJ.Tools
 {
     [PSerializable]
     [AttributeUsage(AttributeTargets.Property)]
@@ -22,19 +22,21 @@ namespace CUGOJ.Backend.Tools
         public enum ConfigTypeEnum
         {
             // 允许远程配置中心加载
-            Remote=0x01,
+            Remote = 0x01,
             // 允许启动参数注入
-            Inject=0x02,
+            Inject = 0x02,
             // 允许修改
-            Editable=0x04,
+            Editable = 0x04,
             // 如果没有被修改或参数注入,则允许从配置中心加载,如果和Remote一起设置会覆盖掉Remote选项
-            RemoteIfNotEdit=0x08
+            RemoteIfNotEdit = 0x08,
+
+            All = Remote|Inject|Editable
         }
         public ConfigTypeEnum ConfigType { get; set; }
         public bool CanInject => (ConfigType & ConfigTypeEnum.Inject) != 0;
         public bool CanEdit => (ConfigType & ConfigTypeEnum.Editable) != 0;
-        public bool CanRemote => ((ConfigType & ConfigTypeEnum.RemoteIfNotEdit) != 0 && !Edited) ||
-            ((ConfigType & ConfigTypeEnum.RemoteIfNotEdit) == 0 && (ConfigType & ConfigTypeEnum.Remote) != 0);
+        public bool CanRemote => (ConfigType & ConfigTypeEnum.RemoteIfNotEdit) != 0 && !Edited ||
+            (ConfigType & ConfigTypeEnum.RemoteIfNotEdit) == 0 && (ConfigType & ConfigTypeEnum.Remote) != 0;
         public bool Edited { get; private set; } = false;
         public static bool Injected { get => _injected; set => _injected = true; }
         private static bool _injected = false;
@@ -112,19 +114,19 @@ namespace CUGOJ.Backend.Tools
 
         public override async void OnGetValue(LocationInterceptionArgs args)
         {
-            if (CanRemote && _configProvider != null) 
+            if (CanRemote && _configProvider != null)
             {
-                if(_configProvider.Version != version)
+                if (_configProvider.Version != version)
                 {
                     await UpdateValue(args);
                 }
             }
-            
+
             base.OnGetValue(args);
         }
         public override void OnSetValue(LocationInterceptionArgs args)
         {
-            if (((CanInject || CanRemote) && !Injected) || CanEdit)
+            if ((CanInject || CanRemote) && !Injected || CanEdit)
             {
                 Edited = true;
                 base.OnSetValue(args);

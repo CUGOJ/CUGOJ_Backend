@@ -7,7 +7,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>CUGOJ.Backend.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <RootNamespace>CUGOJ.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

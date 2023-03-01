@@ -1,4 +1,4 @@
-namespace CUGOJ.Backend.Tools.Properties
+namespace CUGOJ.Tools.Properties
 {
     public static class Properties
     {

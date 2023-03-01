@@ -1,4 +1,4 @@
-namespace CUGOJ.Backend.Tools.Properties;
+namespace CUGOJ.Tools.Properties;
 public static class ParamParser
 {
     private static Dictionary<string, string> argKeys = new Dictionary<string, string>()

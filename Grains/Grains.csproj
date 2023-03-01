@@ -9,13 +9,15 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Orleans.Core" Version="7.0.0" />
     <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Server" Version="7.0.0" />
+    <PackageReference Include="PostSharp" Version="6.10.15" />
   </ItemGroup>
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>CUGOJ.Backend.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <RootNamespace>CUGOJ.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
 </Project>

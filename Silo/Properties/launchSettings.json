@@ -2,8 +2,9 @@
   "profiles": {
     "Silo": {
       "commandName": "Project",
-      "commandLineArgs": "-db server=1.15.93.80,1433;uid=sa;pwd=Long8898321Zx.; -e dev -debug -admin https://1.15.93.80:41919 -nossl",
+      "commandLineArgs": "-Env dev -Debug -AdminAddress https://1.15.93.80:41919 -AllowUnsafeSSL",
       "launchBrowser": true,
+      "launchUrl": "https://localhost:7289/swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

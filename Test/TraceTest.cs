@@ -1,11 +1,11 @@
-using CUGOJ.Backend.Tools;
-using CUGOJ.Backend.Tools.Trace;
+using CUGOJ.Tools;
+using CUGOJ.Tools.Trace;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Diagnostics;
 
-namespace CUGOJ.Backend.Test
+namespace CUGOJ.Test
 {
     [TestClass]
     public class TraceTest
@@ -16,7 +16,7 @@ namespace CUGOJ.Backend.Test
             TracedClass testClass = new TracedClass();
             testClass.Func1();
         }
-        
+
         [TestMethod]
         public void OpenTelemetryTest()
         {
@@ -24,7 +24,7 @@ namespace CUGOJ.Backend.Test
             using var tracerProvider = Sdk.CreateTracerProviderBuilder()
                 .AddSource(serviceName)
                 .SetResourceBuilder(
-                    ResourceBuilder.CreateDefault().AddService(serviceName: serviceName, serviceVersion:"1.0.0"))
+                    ResourceBuilder.CreateDefault().AddService(serviceName: serviceName, serviceVersion: "1.0.0"))
                 .AddConsoleExporter()
                 .Build();
             TracedClass testClass = new TracedClass();
@@ -32,7 +32,7 @@ namespace CUGOJ.Backend.Test
         }
 
         [TestMethod]
-        
+
         public void TraceContainerTest()
         {
             Config.InitConfig(new string[] { "-debug" });
@@ -40,9 +40,9 @@ namespace CUGOJ.Backend.Test
             container.Func1();
         }
     }
-    
 
-    [Traced(ClassName ="TracedClass")]
+
+    [Traced(ClassName = "TracedClass")]
     class TracedClass
     {
         public void Func1()

@@ -1,6 +1,6 @@
-namespace CUGOJ.Backend.Grains.OJ;
+namespace CUGOJ.Grains.OJ;
 
-public interface IUserGrain : Orleans.IGrainWithIntegerKey
+public interface IUserGrain : IGrainWithIntegerKey
 {
 
 }

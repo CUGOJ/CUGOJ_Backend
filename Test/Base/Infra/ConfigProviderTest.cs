@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CUGOJ.Backend.Tools;
+using CUGOJ.Test;
+using CUGOJ.Tools;
 
-namespace CUGOJ.Backend.Test.Base.Infra
+namespace CUGOJ.Test.Base.Infra
 {
     [TestClass]
     public class ConfigProviderTest
@@ -15,7 +16,7 @@ namespace CUGOJ.Backend.Test.Base.Infra
         {
             await Common.CommonTest(async () =>
             {
-                for(int i=0;i<100;i++)
+                for (int i = 0; i < 100; i++)
                 {
                     Console.WriteLine(Config.TraceAddress);
                     Thread.Sleep(500);

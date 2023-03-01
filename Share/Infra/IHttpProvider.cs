@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Share.Infra
+namespace CUGOJ.Share.Infra
 {
     public class HttpResult<T>
     {
@@ -14,7 +14,7 @@ namespace CUGOJ.Backend.Share.Infra
         public HttpStatusCode Code { get; set; }
         public string? Message { get; set; }
     }
-    
+
     public interface IHttpProvider
     {
         public Task<HttpResult<T>> Get<T>(string baseUrl, Dictionary<string, string>? param = null, Dictionary<string, string>? headers = null);

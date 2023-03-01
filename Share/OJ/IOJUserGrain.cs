@@ -1,6 +1,6 @@
-namespace CUGOJ.Backend.Share.OJ;
+namespace CUGOJ.Share.OJ;
 
-public interface IOJUserGrain : Orleans.IGrainWithIntegerKey
+public interface IOJUserGrain : IGrainWithIntegerKey
 {
 
 }

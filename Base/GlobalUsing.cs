@@ -1,2 +1,2 @@
-global using CUGOJ.Backend.Tools;
-global using CUGOJ.Backend.Share.Common.Models;
+global using CUGOJ.Tools;
+global using CUGOJ.Share.Common.Models;

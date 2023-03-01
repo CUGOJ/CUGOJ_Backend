@@ -1,6 +1,6 @@
-﻿using CUGOJ.Backend.Tools;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using PostSharp.Aspects;
+using PostSharp.Extensibility;
 using PostSharp.Serialization;
 using Serilog;
 using Serilog.Context;
@@ -16,7 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace CUGOJ.Backend.Tools.Log
+namespace CUGOJ.Tools.Log
 {
     public class Logger : Microsoft.Extensions.Logging.ILogger
     {
@@ -43,7 +43,7 @@ namespace CUGOJ.Backend.Tools.Log
                 var config = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .Enrich.FromLogContext()
-                .WriteTo.LokiHttp(new NoAuthCredentials(Config.LogAddress),new LogLabelProvider());
+                .WriteTo.LokiHttp(new NoAuthCredentials(Config.LogAddress), new LogLabelProvider());
 #if DEBUG
                 config.WriteTo.Console();
 #endif
@@ -95,6 +95,17 @@ namespace CUGOJ.Backend.Tools.Log
             _serilogger?.Error(message);
         }
 
+        public void Exception(Exception e,
+            [CallerMemberName] string method = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+        {
+
+            using var methodTag = LogContext.PushProperty("Method", method);
+            using var filePos = LogContext.PushProperty("FilePos", $"{sourceFilePath}:{sourceLineNumber}");
+            using var traceID = LogContext.PushProperty("TraceID", Activity.Current?.TraceId);
+            _serilogger?.Error($"{e.Message},{e.StackTrace}");
+        }
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (_serilogger == null) return;

@@ -1,5 +1,5 @@
-namespace CUGOJ.Backend.Share.DAO;
-public interface IUserGrainDAO : Orleans.IGrainWithIntegerKey
+namespace CUGOJ.Share.DAO;
+public interface IUserGrainDAO : IGrainWithIntegerKey
 {
     Task<long> CreateUser();
 }

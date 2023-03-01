@@ -1,14 +1,14 @@
-using CUGOJ.Backend.Base.Infra.ConfigProvider;
-using CUGOJ.Backend.Share;
-using CUGOJ.Backend.Tools.Common;
-using CUGOJ.Backend.Tools.Infra.HttpProvider;
+using CUGOJ.Tools.Infra.ConfigProvider;
+using CUGOJ.Share;
+using CUGOJ.Tools.Common;
+using CUGOJ.Tools.Infra.HttpProvider;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PostSharp.Reflection;
 using System.Net;
 using System.Reflection;
 
-namespace CUGOJ.Backend.Tools
+namespace CUGOJ.Tools
 {
     public static partial class Config
     {
@@ -115,7 +115,8 @@ namespace CUGOJ.Backend.Tools
         public static async Task InitRemoteConfig()
         {
             string? key;
-            var configProvider = ConfigItemAttribute.ConfigProvider;
+            var configProvider = new ConfigProvider(new HttpProvider());
+            ConfigItemAttribute.ConfigProvider = configProvider;
             if (configProvider != null)
             {
                 // 加载远程配置

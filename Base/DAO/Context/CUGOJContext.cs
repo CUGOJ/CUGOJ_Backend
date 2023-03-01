@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using CUGOJ.Backend.Share.Common.Models;
-using CUGOJ.Backend.Share.DAO;
+using CUGOJ.Share.Common.Models;
+using CUGOJ.Share.DAO;
 
-namespace CUGOJ.Backend.Base.DAO.Context
+namespace CUGOJ.Base.DAO.Context
 {
     public partial class CUGOJContext : DbContext, ICUGOJContext
     {
@@ -13,38 +13,73 @@ namespace CUGOJ.Backend.Base.DAO.Context
         {
 
         }
-        public virtual DbSet<ContestBase> ContestBases { get; set; } = null!;
-        public virtual DbSet<ContestContent> ContestContents { get; set; } = null!;
-        public virtual DbSet<ContestProblem> ContestProblems { get; set; } = null!;
-        public virtual DbSet<ObjectTag> ObjectTags { get; set; } = null!;
-        public virtual DbSet<Organization> Organizations { get; set; } = null!;
-        public virtual DbSet<ProblemBase> ProblemBases { get; set; } = null!;
-        public virtual DbSet<ProblemContent> ProblemContents { get; set; } = null!;
-        public virtual DbSet<ProblemSource> ProblemSources { get; set; } = null!;
-        public virtual DbSet<Problemset> Problemsets { get; set; } = null!;
-        public virtual DbSet<ProblemsetProblem> ProblemsetProblems { get; set; } = null!;
-        public virtual DbSet<Register> Registers { get; set; } = null!;
-        public virtual DbSet<Score> Scores { get; set; } = null!;
-        public virtual DbSet<SolutionBase> SolutionBases { get; set; } = null!;
-        public virtual DbSet<SolutionContent> SolutionContents { get; set; } = null!;
-        public virtual DbSet<SubmissionBase> SubmissionBases { get; set; } = null!;
-        public virtual DbSet<SubmissionContent> SubmissionContents { get; set; } = null!;
-        public virtual DbSet<Tag> Tags { get; set; } = null!;
-        public virtual DbSet<Team> Teams { get; set; } = null!;
-        public virtual DbSet<TeamUser> TeamUsers { get; set; } = null!;
-        public virtual DbSet<User> Users { get; set; } = null!;
-        public virtual DbSet<UserLogin> UserLogins { get; set; } = null!;
-        public virtual DbSet<UserOrganizationLink> UserOrganizationLinks { get; set; } = null!;
-        public virtual DbSet<Authorize> Authorizes { get; set; } = null!;
+        public virtual DbSet<ContestBasePo> ContestBases { get; set; } = null!;
+        public virtual DbSet<ContestContentPo> ContestContents { get; set; } = null!;
+        public virtual DbSet<ContestProblemPo> ContestProblems { get; set; } = null!;
+        public virtual DbSet<ObjectTagPo> ObjectTags { get; set; } = null!;
+        public virtual DbSet<OrganizationPo> Organizations { get; set; } = null!;
+        public virtual DbSet<ProblemBasePo> ProblemBases { get; set; } = null!;
+        public virtual DbSet<ProblemContentPo> ProblemContents { get; set; } = null!;
+        public virtual DbSet<ProblemSourcePo> ProblemSources { get; set; } = null!;
+        public virtual DbSet<ProblemsetPo> Problemsets { get; set; } = null!;
+        public virtual DbSet<ProblemsetProblemPo> ProblemsetProblems { get; set; } = null!;
+        public virtual DbSet<RegisterPo> Registers { get; set; } = null!;
+        public virtual DbSet<ScorePo> Scores { get; set; } = null!;
+        public virtual DbSet<SolutionBasePo> SolutionBases { get; set; } = null!;
+        public virtual DbSet<SolutionContentPo> SolutionContents { get; set; } = null!;
+        public virtual DbSet<SubmissionBasePo> SubmissionBases { get; set; } = null!;
+        public virtual DbSet<SubmissionContentPo> SubmissionContents { get; set; } = null!;
+        public virtual DbSet<TagPo> Tags { get; set; } = null!;
+        public virtual DbSet<TeamPo> Teams { get; set; } = null!;
+        public virtual DbSet<TeamUserPo> TeamUsers { get; set; } = null!;
+        public virtual DbSet<UserPo> Users { get; set; } = null!;
+        public virtual DbSet<UserLoginPo> UserLogins { get; set; } = null!;
+        public virtual DbSet<UserOrganizationLinkPo> UserOrganizationLinks { get; set; } = null!;
+        public virtual DbSet<AuthorizePo> Authorizes { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(Config.StoreDBConnectionString);
         }
 
+        private void UpdateEntities()
+        {
+            foreach (var entity in from e in ChangeTracker.Entries()
+                                   where e.Entity is Share.Common.Models.IModel
+                                   select (e.Entity as Share.Common.Models.IModel))
+            {
+                entity.UpdateTime = DateTime.Now;
+                if (entity.Id == 0)
+                    entity.CreateTime = DateTime.Now;
+            }
+        }
+
+        public override int SaveChanges()
+        {
+            UpdateEntities();
+            return base.SaveChanges();
+        }
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            UpdateEntities();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            UpdateEntities();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            UpdateEntities();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ContestBase>(entity =>
+            modelBuilder.Entity<ContestBasePo>(entity =>
             {
                 entity.ToTable("contest_base");
 
@@ -107,7 +142,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("出题人");
             });
 
-            modelBuilder.Entity<ContestContent>(entity =>
+            modelBuilder.Entity<ContestContentPo>(entity =>
             {
                 entity.ToTable("contest_content");
 
@@ -125,7 +160,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("比赛ID");
             });
 
-            modelBuilder.Entity<ContestProblem>(entity =>
+            modelBuilder.Entity<ContestProblemPo>(entity =>
             {
                 entity.ToTable("contest_problem");
 
@@ -165,7 +200,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("版本");
             });
 
-            modelBuilder.Entity<ObjectTag>(entity =>
+            modelBuilder.Entity<ObjectTagPo>(entity =>
             {
                 entity.ToTable("object_tag");
 
@@ -192,7 +227,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("目标主体类型");
             });
 
-            modelBuilder.Entity<Organization>(entity =>
+            modelBuilder.Entity<OrganizationPo>(entity =>
             {
                 entity.ToTable("organization");
 
@@ -243,7 +278,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("更新时间");
             });
 
-            modelBuilder.Entity<ProblemBase>(entity =>
+            modelBuilder.Entity<ProblemBasePo>(entity =>
             {
                 entity.ToTable("problem_base");
 
@@ -313,7 +348,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("出题人ID");
             });
 
-            modelBuilder.Entity<ProblemContent>(entity =>
+            modelBuilder.Entity<ProblemContentPo>(entity =>
             {
                 entity.ToTable("problem_content");
 
@@ -331,7 +366,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("题目ID");
             });
 
-            modelBuilder.Entity<ProblemSource>(entity =>
+            modelBuilder.Entity<ProblemSourcePo>(entity =>
             {
                 entity.ToTable("problem_source");
 
@@ -355,7 +390,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("题目源主页");
             });
 
-            modelBuilder.Entity<Problemset>(entity =>
+            modelBuilder.Entity<ProblemsetPo>(entity =>
             {
                 entity.ToTable("problemset");
 
@@ -395,7 +430,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("更新时间");
             });
 
-            modelBuilder.Entity<ProblemsetProblem>(entity =>
+            modelBuilder.Entity<ProblemsetProblemPo>(entity =>
             {
                 entity.ToTable("problemset_problem");
 
@@ -423,7 +458,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("状态枚举");
             });
 
-            modelBuilder.Entity<Register>(entity =>
+            modelBuilder.Entity<RegisterPo>(entity =>
             {
                 entity.ToTable("register");
 
@@ -472,7 +507,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("更新时间");
             });
 
-            modelBuilder.Entity<Score>(entity =>
+            modelBuilder.Entity<ScorePo>(entity =>
             {
                 entity.ToTable("score");
 
@@ -512,7 +547,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("得分");
             });
 
-            modelBuilder.Entity<SolutionBase>(entity =>
+            modelBuilder.Entity<SolutionBasePo>(entity =>
             {
                 entity.ToTable("solution_base");
 
@@ -554,7 +589,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("作者ID");
             });
 
-            modelBuilder.Entity<SolutionContent>(entity =>
+            modelBuilder.Entity<SolutionContentPo>(entity =>
             {
                 entity.ToTable("solution_content");
 
@@ -572,7 +607,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("题解ID");
             });
 
-            modelBuilder.Entity<SubmissionBase>(entity =>
+            modelBuilder.Entity<SubmissionBasePo>(entity =>
             {
                 entity.ToTable("submission_base");
 
@@ -634,7 +669,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("更新时间");
             });
 
-            modelBuilder.Entity<SubmissionContent>(entity =>
+            modelBuilder.Entity<SubmissionContentPo>(entity =>
             {
                 entity.ToTable("submission_content");
 
@@ -652,7 +687,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("提交ID");
             });
 
-            modelBuilder.Entity<Tag>(entity =>
+            modelBuilder.Entity<TagPo>(entity =>
             {
                 entity.ToTable("tag");
 
@@ -684,7 +719,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("目标主体类型");
             });
 
-            modelBuilder.Entity<Team>(entity =>
+            modelBuilder.Entity<TeamPo>(entity =>
             {
                 entity.ToTable("team");
 
@@ -736,7 +771,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("更新时间");
             });
 
-            modelBuilder.Entity<TeamUser>(entity =>
+            modelBuilder.Entity<TeamUserPo>(entity =>
             {
                 entity.ToTable("team_user");
 
@@ -776,7 +811,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("用户类型");
             });
 
-            modelBuilder.Entity<User>(entity =>
+            modelBuilder.Entity<UserPo>(entity =>
             {
                 entity.ToTable("user");
 
@@ -878,7 +913,7 @@ namespace CUGOJ.Backend.Base.DAO.Context
                     .HasComment("用户名");
             });
 
-            modelBuilder.Entity<UserLogin>(entity =>
+            modelBuilder.Entity<UserLoginPo>(entity =>
             {
                 entity.ToTable("user_login");
 

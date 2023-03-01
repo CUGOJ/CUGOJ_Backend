@@ -1,5 +1,5 @@
-﻿using CUGOJ.Backend.Silo.Init;
-using CUGOJ.Backend.Tools;
+﻿using CUGOJ.Tools;
+using CUGOJ.Silo.Init;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,7 +11,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Test
+namespace CUGOJ.Test
 {
     public static partial class Common
     {
@@ -54,7 +54,7 @@ namespace CUGOJ.Backend.Test
         //            options.Invariant = "System.Data.SqlClient";
         //        })
         //.ConfigureEndpoints(siloPort: Config.SiloPort, gatewayPort: Config.GatewayPort);
-        //            // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CUGOJ.Backend.Grains.UserGrain).Assembly).WithReferences())
+        //            // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CUGOJ.Grains.UserGrain).Assembly).WithReferences())
         //        });
             siloBuilder.ConfigureServices(
                 service =>
@@ -117,7 +117,7 @@ namespace CUGOJ.Backend.Test
             //            options.Invariant = "System.Data.SqlClient";
             //        })
             //.ConfigureEndpoints(siloPort: Config.SiloPort, gatewayPort: Config.GatewayPort);
-            //            // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CUGOJ.Backend.Grains.UserGrain).Assembly).WithReferences())
+            //            // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CUGOJ.Grains.UserGrain).Assembly).WithReferences())
             //        });
             siloBuilder.ConfigureServices(
                 service =>

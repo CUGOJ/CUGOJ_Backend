@@ -1,5 +1,4 @@
-﻿using CUGOJ.Backend.Tools;
-using OpenTelemetry;
+﻿using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Logs;
@@ -12,11 +11,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Tools.Trace
+namespace CUGOJ.Tools.Trace
 {
     [PSerializable]
     [AttributeUsage(AttributeTargets.Class)]
-    public class TraceContainerAttribute :OnMethodBoundaryAspect
+    public class TraceContainerAttribute : OnMethodBoundaryAspect
     {
         public override void OnEntry(MethodExecutionArgs args)
         {
@@ -31,7 +30,7 @@ namespace CUGOJ.Backend.Tools.Trace
                     opt.Protocol = JaegerExportProtocol.HttpBinaryThrift;
                 });
             }
-            if(Config.Debug)
+            if (Config.Debug)
             {
                 builder.AddConsoleExporter();
             }

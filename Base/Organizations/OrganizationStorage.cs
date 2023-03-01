@@ -1,8 +1,9 @@
-﻿using CUGOJ.Backend.Base.DAO.Context;
-using CUGOJ.Backend.Share.Common.Models;
-using CUGOJ.Backend.Share.Common.Organizations;
-using CUGOJ.Backend.Share.Common.VersionContainer;
-using CUGOJ.Backend.Tools.Common;
+﻿using CUGOJ.Base.DAO.Context;
+using CUGOJ.Tools.Common;
+using CUGOJ.Share.Common.Models;
+using CUGOJ.Share.Common.Organizations;
+using CUGOJ.Share.Common.VersionContainer;
+using CUGOJ.Tools.Common;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,16 +11,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Base.Organizations
+namespace CUGOJ.Base.Organizations
 {
     public class OrganizationStorage : IVersionItemStorage<IVersionItem>, IOrganizationQuery
     {
-        private readonly Dictionary<long, OrganizationBase> organizations = new();
-        private readonly Dictionary<long, List<UserOrganizationLinkBase>> userOrganizations = new();
+        private readonly Dictionary<long, OrganizationPoBase> organizations = new();
+        private readonly Dictionary<long, List<UserOrganizationLinkPoBase>> userOrganizations = new();
 
         private readonly ReaderWriterLockSlim _lock = new();
         public ReaderWriterLockSlim Lock => _lock;
 
+        [ReaderWriterLock(ReaderWriterLockAttribute.LockTypeEnum.Read)]
         public Task<IEnumerable<IVersionItem>> GetAllVersionItems()
         {
             var res = new List<IVersionItem>();
@@ -31,6 +33,7 @@ namespace CUGOJ.Backend.Base.Organizations
             return Task.FromResult((IEnumerable<IVersionItem>)res);
         }
 
+        [ReaderWriterLock(ReaderWriterLockAttribute.LockTypeEnum.Write)]
         public async Task Init()
         {
             organizations.Clear();
@@ -38,7 +41,7 @@ namespace CUGOJ.Backend.Base.Organizations
             var version = CommonTools.GetUTCUnixMilli();
             using var context = new CUGOJContext();
             var _organizations = await (from o in context.Organizations
-                                        select new OrganizationBase
+                                        select new OrganizationPoBase
                                         {
                                             Id = o.Id,
                                             Parent = o.ParentId,
@@ -47,13 +50,13 @@ namespace CUGOJ.Backend.Base.Organizations
                                             Version = version,
                                         }).ToArrayAsync();
             var _users = await (from u in context.UserOrganizationLinks
-                                select new UserOrganizationLinkBase
+                                select new UserOrganizationLinkPoBase
                                 {
                                     Id = u.Id,
                                     OrganizationId = u.Id,
                                     Role = u.Role,
                                     Version = version,
-                                    UserOrganizationLinkBaseType = UserOrganizationLinkBase.UserOrganizationLinkBaseTypeEnum.Add
+                                    UserOrganizationLinkBaseType = UserOrganizationLinkPoBase.UserOrganizationLinkBaseTypeEnum.Add
                                 }).ToArrayAsync();
             foreach (var org in _organizations)
             {
@@ -65,18 +68,19 @@ namespace CUGOJ.Backend.Base.Organizations
             }
         }
 
-        private void PushOrganization(OrganizationBase item)
+        private void PushOrganization(OrganizationPoBase item)
         {
             organizations[item.Id] = item;
         }
 
-        private void PushUser(UserOrganizationLinkBase item)
+        private void PushUser(UserOrganizationLinkPoBase item)
         {
             if (!userOrganizations.TryGetValue(item.Id, out var user))
             {
-                user = new List<UserOrganizationLinkBase>();
+                user = new List<UserOrganizationLinkPoBase>();
+                userOrganizations[item.Id] = user;
             }
-            if (item.UserOrganizationLinkBaseType == UserOrganizationLinkBase.UserOrganizationLinkBaseTypeEnum.Add)
+            if (item.UserOrganizationLinkBaseType == UserOrganizationLinkPoBase.UserOrganizationLinkBaseTypeEnum.Add)
             {
                 var found = false;
                 foreach (var link in user)
@@ -107,15 +111,16 @@ namespace CUGOJ.Backend.Base.Organizations
             }
         }
 
+        [ReaderWriterLock(ReaderWriterLockAttribute.LockTypeEnum.Write)]
         public Task PushVersionItems(IEnumerable<IVersionItem> items)
         {
             foreach (var item in items)
             {
-                if (item is OrganizationBase @organizationBase)
+                if (item is OrganizationPoBase @organizationBase)
                 {
                     PushOrganization(organizationBase);
                 }
-                else if (item is UserOrganizationLinkBase @userOrganizationLinkBase)
+                else if (item is UserOrganizationLinkPoBase @userOrganizationLinkBase)
                 {
                     PushUser(userOrganizationLinkBase);
                 }
@@ -123,17 +128,24 @@ namespace CUGOJ.Backend.Base.Organizations
             return Task.CompletedTask;
         }
 
-        private IEnumerable<OrganizationBase>GetOrganization(IEnumerable<OrganizationBase>root,long depLimit)
+        private IEnumerable<OrganizationPoBase> GetOrganization(IEnumerable<OrganizationPoBase> root, long depLimit)
         {
             HashSet<long> orgIdSet = new(from org in root select org.Id);
-            var organizationList = new List<OrganizationBase>(root);
+            var organizationList = new List<OrganizationPoBase>(root);
             while (root.Any() && depLimit > 0)
             {
                 root = (from rt in root
                         join org in organizations
                         on rt.Parent equals org.Key
                         where rt.Parent != 0 && !orgIdSet.Contains(rt.Parent)
-                        select org.Value);
+                        select new OrganizationPoBase
+                        {
+                            Id = org.Value.Id,
+                            OrganizationType = org.Value.OrganizationType,
+                            Parent = org.Value.Parent,
+                            Role = rt.Role,
+                            Version = org.Value.Version
+                        }).ToList();
                 orgIdSet.UnionWith(from org in root select org.Id);
                 organizationList.AddRange(root);
                 depLimit--;
@@ -141,29 +153,38 @@ namespace CUGOJ.Backend.Base.Organizations
             return organizationList;
         }
 
-        public Task<IEnumerable<OrganizationBase>> GetOrganizationByUser(long userId, int maxDep = 0, IEnumerable<Share.Common.Models.Organization.OrganizationTypeEnum>? TypeLimit = null)
+        [ReaderWriterLock(ReaderWriterLockAttribute.LockTypeEnum.Read)]
+        public Task<IEnumerable<OrganizationPoBase>> GetOrganizationByUser(long userId, int maxDep = 0, IEnumerable<OrganizationPo.OrganizationTypeEnum>? TypeLimit = null)
         {
             if (!userOrganizations.TryGetValue(userId, out var organizationList))
             {
-                return Task.FromResult((IEnumerable<OrganizationBase>)new List<OrganizationBase>());
+                return Task.FromResult((IEnumerable<OrganizationPoBase>)new List<OrganizationPoBase>());
             }
-            var root = (from userOrg in organizationList
-                        join org in organizations
-                        on userOrg.OrganizationId equals org.Key
-                        where userOrg.OrganizationId != 0
-                        select org.Value);
+            var root = from userOrg in organizationList
+                       join org in organizations
+                       on userOrg.OrganizationId equals org.Key
+                       where userOrg.OrganizationId != 0
+                       select new OrganizationPoBase
+                       {
+                           Id = org.Value.Id,
+                           OrganizationType = org.Value.OrganizationType,
+                           Parent = org.Value.Parent,
+                           Role = userOrg.Role,
+                           Version = org.Value.Version
+                       };
             return Task.FromResult(GetOrganization(root, maxDep == 0 ? long.MaxValue : maxDep - 1));
         }
 
-        public Task<IEnumerable<OrganizationBase>> GetOrganizationByOrg(long orgId, int maxDep = 0, IEnumerable<Share.Common.Models.Organization.OrganizationTypeEnum>? TypeLimit = null)
+        [ReaderWriterLock(ReaderWriterLockAttribute.LockTypeEnum.Read)]
+        public Task<IEnumerable<OrganizationPoBase>> GetOrganizationByOrg(long orgId, int maxDep = 0, IEnumerable<OrganizationPo.OrganizationTypeEnum>? TypeLimit = null)
         {
-            if (!organizations.TryGetValue(orgId, out var organization)||organization.Parent==0)
+            if (!organizations.TryGetValue(orgId, out var organization) || organization.Parent == 0)
             {
-                return Task.FromResult((IEnumerable<OrganizationBase>)new List<OrganizationBase>());
+                return Task.FromResult((IEnumerable<OrganizationPoBase>)new List<OrganizationPoBase>());
             }
-            return Task.FromResult(GetOrganization((from org in organizations
-                                                    where org.Key == organization.Parent
-                                                    select org.Value), maxDep == 0 ? long.MaxValue : maxDep - 1));
+            return Task.FromResult(GetOrganization(from org in organizations
+                                                   where org.Key == organization.Parent
+                                                   select org.Value, maxDep == 0 ? long.MaxValue : maxDep - 1));
         }
     }
 }

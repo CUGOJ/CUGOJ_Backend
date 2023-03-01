@@ -1,1 +1,1 @@
-global using CUGOJ.Backend.Tools;
+global using CUGOJ.Tools;

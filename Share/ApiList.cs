@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Share
+namespace CUGOJ.Share
 {
     public static class ApiList
     {

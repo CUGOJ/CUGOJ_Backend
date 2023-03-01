@@ -1,7 +1,5 @@
-﻿using CUGOJ.Backend.Share;
-using CUGOJ.Backend.Share.Infra;
-using CUGOJ.Backend.Tools.Log;
-using CUGOJ.Backend.Tools;
+﻿using CUGOJ.Tools.Log;
+using CUGOJ.Tools;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,17 +10,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using CUGOJ.Backend.Tools.Common;
-using CUGOJ.Backend.Tools.Infra.HttpProvider;
+using CUGOJ.Tools.Common;
+using CUGOJ.Tools.Infra.HttpProvider;
+using CUGOJ.Share;
+using CUGOJ.Share.Infra;
 
-namespace CUGOJ.Backend.Base.Infra.ConfigProvider
+namespace CUGOJ.Tools.Infra.ConfigProvider
 {
     // Singleton Service
     public class ConfigProvider : IConfigProvider
     {
-        private readonly Tools.Log.Logger? _logger;
+        private readonly Log.Logger? _logger;
         private readonly IHttpProvider _httpProvider;
-        public ConfigProvider(IHttpProvider httpProvider, Tools.Log.Logger? logger = null)
+        public ConfigProvider(IHttpProvider httpProvider, Log.Logger? logger = null)
         {
             _logger = logger;
             _httpProvider = httpProvider;
@@ -51,50 +51,57 @@ namespace CUGOJ.Backend.Base.Infra.ConfigProvider
 
         public async Task UpdateConfig()
         {
-            var getConfigResult = await _httpProvider.Post<Dictionary<string, string>>(Config.GetApiAddress(ApiList.GetConfig), Config.Env);
-            if (getConfigResult.IsSuccess)
+            try
             {
-                if (getConfigResult.Data == null)
+                var getConfigResult = await _httpProvider.Post<Dictionary<string, string>>(Config.GetApiAddress(ApiList.GetConfig), Config.Env);
+                if (getConfigResult.IsSuccess)
                 {
-                    _logger?.Error($"获取到的配置信息为空,code = {getConfigResult.Code},msg = {getConfigResult.Message}");
-                    return;
-                }
-                if (!Equals(store, getConfigResult.Data))
-                {
-                    version = (long)(DateTime.Now - DateTime.UnixEpoch).TotalMilliseconds;
-#if DEBUG
-                    var changeRecord = "";
-                    HashSet<string> keySet = new();
-                    foreach (var k in store.Keys)
-                        keySet.Add(k);
-                    foreach (var k in getConfigResult.Data.Keys)
-                        keySet.Add(k);
-                    foreach (var key in keySet)
+                    if (getConfigResult.Data == null)
                     {
-                        if (store.ContainsKey(key))
+                        _logger?.Error($"获取到的配置信息为空,code = {getConfigResult.Code},msg = {getConfigResult.Message}");
+                        return;
+                    }
+                    if (!Equals(store, getConfigResult.Data))
+                    {
+                        version = (long)(DateTime.Now - DateTime.UnixEpoch).TotalMilliseconds;
+#if DEBUG
+                        var changeRecord = "";
+                        HashSet<string> keySet = new();
+                        foreach (var k in store.Keys)
+                            keySet.Add(k);
+                        foreach (var k in getConfigResult.Data.Keys)
+                            keySet.Add(k);
+                        foreach (var key in keySet)
                         {
-                            if (!getConfigResult.Data.ContainsKey(key))
+                            if (store.ContainsKey(key))
                             {
-                                changeRecord += $"{key} : {store[key]} -> null\n";
+                                if (!getConfigResult.Data.ContainsKey(key))
+                                {
+                                    changeRecord += $"{key} : {store[key]} -> null\n";
+                                }
+                                else
+                                {
+                                    changeRecord += $"{key} : {store[key]} -> {getConfigResult.Data[key]}\n";
+                                }
                             }
                             else
                             {
-                                changeRecord += $"{key} : {store[key]} -> {getConfigResult.Data[key]}\n";
+                                changeRecord += $"{key} : null -> {getConfigResult.Data[key]}\n";
                             }
                         }
-                        else
-                        {
-                            changeRecord += $"{key} : null -> {getConfigResult.Data[key]}\n";
-                        }
-                    }
-                    _logger?.Info($"配置更新,store, changeRecord = {changeRecord}");
+                        _logger?.Info($"配置更新,store, changeRecord = {changeRecord}");
 #endif
-                    store = getConfigResult.Data;
+                        store = getConfigResult.Data;
+                    }
+                }
+                else
+                {
+                    _logger?.Error($"未能成功获取配置信息,code = {getConfigResult.Code},msg = {getConfigResult.Message}");
                 }
             }
-            else
+            catch(Exception e)
             {
-                _logger?.Error($"未能成功获取配置信息,code = {getConfigResult.Code},msg = {getConfigResult.Message}");
+                _logger?.Exception(e);
             }
         }
 
@@ -116,7 +123,7 @@ namespace CUGOJ.Backend.Base.Infra.ConfigProvider
             });
         }
 
-        public async Task<bool> CheckExist(string key,Type type)
+        public async Task<bool> CheckExist(string key, Type type)
         {
 
             if (!store.TryGetValue(key, out string? value))

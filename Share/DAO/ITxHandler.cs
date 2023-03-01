@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Share.DAO
+namespace CUGOJ.Share.DAO
 {
     public interface ITxHandler
     {

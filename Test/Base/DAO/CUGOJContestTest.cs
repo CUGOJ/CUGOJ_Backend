@@ -1,12 +1,13 @@
-﻿using CUGOJ.Backend.Base.DAO.Context;
-using CUGOJ.Backend.Tools;
+﻿using CUGOJ.Base.DAO.Context;
+using CUGOJ.Test;
+using CUGOJ.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Test.Base.DAO
+namespace CUGOJ.Test.Base.DAO
 {
     [TestClass]
     public class CUGOJContestTest

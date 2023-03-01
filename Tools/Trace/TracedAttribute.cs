@@ -1,5 +1,4 @@
-﻿using CUGOJ.Backend.Tools;
-using PostSharp.Aspects;
+﻿using PostSharp.Aspects;
 using PostSharp.Serialization;
 using System;
 using System.Collections.Generic;
@@ -8,10 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Tools.Trace
+namespace CUGOJ.Tools.Trace
 {
     [PSerializable]
-    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class TracedAttribute : OnMethodBoundaryAspect
     {
         private static ActivitySource activitySource = new ActivitySource(Config.ServiceName);

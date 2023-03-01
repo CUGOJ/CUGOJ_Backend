@@ -1,5 +1,6 @@
-﻿using CUGOJ.Backend.Share.Common.VersionContainer;
-using CUGOJ.Backend.Tools.Log;
+﻿using CUGOJ.Tools.Common;
+using CUGOJ.Share.Common.VersionContainer;
+using CUGOJ.Tools.Log;
 using Orleans.Core;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CUGOJ.Backend.Tools.Common.VersionContainer
+namespace CUGOJ.Tools.Common
 {
     public class VersionItemManager<T> : IVersionItemManager<T> where T : IVersionItem
     {
@@ -16,67 +17,42 @@ namespace CUGOJ.Backend.Tools.Common.VersionContainer
         private long _managerVersion = CommonTools.GetUTCUnixMilli();
         readonly LinkedList<T> versionItems = new();
         readonly Dictionary<long, LinkedListNode<T>> versionItemsIndex = new();
-        public VersionItemManager(IVersionItemStorage<T> storage,Logger? logger)
+        public VersionItemManager(IVersionItemStorage<T> storage, Logger? logger)
         {
             _storage = storage;
             _logger = logger;
         }
         public Task<IEnumerable<T>> GetAllVersionItems()
         {
-            if(_storage.Lock.TryEnterReadLock(Config.VersionItemMangerReaderLockTimeout))
-            {
-                try
-                {
-                    return _storage.GetAllVersionItems();
-                }
-                finally
-                {
-                    _storage.Lock.ExitReadLock();
-                }
-            }
-            else
-            {
-                throw new Exception("服务繁忙,请稍后再试");
-            }
+            return _storage.GetAllVersionItems();
         }
 
         public async Task PushVersionItems(IEnumerable<T> items)
         {
-            if (_storage.Lock.TryEnterWriteLock(Config.VersionItemManagerWriterLockTimeout))
+            try
             {
-                try
+                var version = CommonTools.GetUTCUnixMilli();
+                foreach (var item in items)
                 {
-                    var version = CommonTools.GetUTCUnixMilli();
-                    foreach(var item in items)
-                    {
-                        item.Version = version;
-                        versionItems.AddLast(item);
-                    }
-                    await _storage.PushVersionItems(items);
-                    if (versionItems.Last != null)
-                        versionItemsIndex[version] = versionItems.Last;
-                    LimitVersionItems();
+                    item.Version = version;
+                    versionItems.AddLast(item);
                 }
-                catch(Exception e)
-                {
-                    _logger?.Error($"PushVersionItemsError:{e}");
-                    versionItems.Clear();
-                    versionItemsIndex.Clear();
-                    _managerVersion = CommonTools.GetUTCUnixMilli();
-                    throw;
-                }
-                finally
-                {
-                    _storage.Lock.ExitWriteLock();
-                }
+                await _storage.PushVersionItems(items);
+                if (versionItems.Last != null)
+                    versionItemsIndex[version] = versionItems.Last;
+                LimitVersionItems();
             }
-            else
+            catch (Exception e)
             {
-                throw new Exception("服务繁忙,请稍后再试");
+                _logger?.Error($"PushVersionItemsError:{e}");
+                versionItems.Clear();
+                versionItemsIndex.Clear();
+                _managerVersion = CommonTools.GetUTCUnixMilli();
+                throw;
             }
         }
 
-        private async Task<UpdateVersionItemResponse<T>>GetRebaseResp()
+        private async Task<UpdateVersionItemResponse<T>> GetRebaseResp()
         {
             UpdateVersionItemResponse<T> resp = new()
             {
@@ -92,7 +68,7 @@ namespace CUGOJ.Backend.Tools.Common.VersionContainer
             return resp;
         }
 
-        private async Task<UpdateVersionItemResponse<T>>GetIncrementResp(long version)
+        private async Task<UpdateVersionItemResponse<T>> GetIncrementResp(long version)
         {
             if (!versionItemsIndex.TryGetValue(version, out LinkedListNode<T>? item))
             {
@@ -109,12 +85,12 @@ namespace CUGOJ.Backend.Tools.Common.VersionContainer
                     node = node.Next;
                 }
             }
-            if (item == null) 
+            if (item == null)
             {
                 _logger?.Error($"索引丢失,version = {version},T={typeof(T).Name}");
                 return await GetRebaseResp();
             }
-            else if (item.Value.Version!=version || (item.Next!=null && item.Next.Value.Version <= version))
+            else if (item.Value.Version != version || item.Next != null && item.Next.Value.Version <= version)
             {
                 _logger?.Error($"索引数据有误,T={typeof(T).Name},索引={CommonTools.ToJsonString(item)}");
                 return await GetRebaseResp();
@@ -126,7 +102,7 @@ namespace CUGOJ.Backend.Tools.Common.VersionContainer
                 ResponseType = UpdateVersionItemResponse<T>.UpdateVersionItemResponseTypeEnum.Increment,
             };
             item = item.Next;
-            while(item!=null)
+            while (item != null)
             {
                 respItems.Add(item.Value);
                 resp.Version = Math.Max(resp.Version, item.Value.Version);
@@ -134,38 +110,27 @@ namespace CUGOJ.Backend.Tools.Common.VersionContainer
             resp.VersionItemInfo = respItems;
             return resp;
         }
-        public async Task<UpdateVersionItemResponse<T>> UpdateVersionItem(long version, long managerVersion)
+        public async Task<UpdateVersionItemResponse<T>> SynchVersionItem(long version, long managerVersion)
         {
-            if (_storage.Lock.TryEnterReadLock(Config.VersionItemMangerReaderLockTimeout))
+            try
             {
-                try
+                if (managerVersion != _managerVersion)
                 {
-                    if (managerVersion != _managerVersion )
-                    {
-                        return await GetRebaseResp();
-                    }
-                    else if (versionItems.First!=null && versionItems.First.Value.Version>version)
-                    {
-                        return await GetRebaseResp();
-                    }
-                    else
-                    {
-                        return await GetIncrementResp(version);
-                    }
+                    return await GetRebaseResp();
                 }
-                catch(Exception e)
+                else if (versionItems.First != null && versionItems.First.Value.Version > version)
                 {
-                    _logger?.Error($"PushVersionItemsError:{e}");
-                    throw;
+                    return await GetRebaseResp();
                 }
-                finally
+                else
                 {
-                    _storage.Lock.ExitReadLock();
+                    return await GetIncrementResp(version);
                 }
             }
-            else
+            catch (Exception e)
             {
-                throw new Exception("服务繁忙,请稍后再试");
+                _logger?.Error($"PushVersionItemsError:{e}");
+                throw;
             }
         }
 
